@@ -6,7 +6,8 @@ const films=[
  {title:"The Golem",short:"The Golem",director:"Paul Wegener & Carl Boese",chapter:"AWAKEN THE GIANT",artist:"Metallica",album:"Metallica · The Black Album",list:"PLWVo2tank-zztO8BuDhNaf3c3v4GuEIap",archive:"TheGolem_893",file:"TheGolem_512kb.mp4",color:"#efb17a",note:"A creature of clay, a city under threat. Heavy riffs meet the physical weight and looming architecture of this expressionist fantasy."},
  {title:"The Mark of Zorro",short:"Zorro",director:"Fred Niblo · starring Douglas Fairbanks",chapter:"MAKE YOUR ESCAPE",artist:"Journey",album:"Escape",list:"PLNPGM2D7aODcXjsBcs_OjWPV98wuwzb0i",archive:"vidzo",file:"The-Mark-of-Zorro-v2.mp4",color:"#afe2c3",note:"A masked hero, impossible escapes, and a little romance. Journey’s soaring hooks carry the evening toward a brighter finish."}
 ];
-type Player={playVideo():void;pauseVideo():void;playVideoAt(n:number):void;nextVideo():void;setLoop(b:boolean):void;destroy():void};
+const escapeTracks=["1k8craCGpgs","5f7bgRtaSwk","EX-_WkUxyLU","RW9O56XqDMI","hCySG1Rv-mc","ayxBzwgzLrY","Ky67z1Om2M8","0WdWH30SLCM","6pwm_XGqbBw","M2e3XN7yVjM"];
+type Player={cuePlaylist(ids:string[]):void;playVideo():void;pauseVideo():void;playVideoAt(n:number):void;nextVideo():void;setLoop(b:boolean):void;destroy():void};
 type YT={Player:new(el:HTMLElement,options:Record<string,unknown>)=>Player};
 let api:Promise<YT>|undefined;
 function loadMusic(){
@@ -27,11 +28,13 @@ function Theater({index,next}:{index:number;next:()=>void}){
  useEffect(()=>{
   active.current=true;let disposed=false;let p:Player|undefined;setReady(false);setMusicError("");
   const box=mount.current!,frame=document.createElement("iframe");
-  const params=new URLSearchParams({listType:"playlist",list:f.list,enablejsapi:"1",origin:window.location.origin,playsinline:"1",loop:"1"});
-  frame.src="https://www.youtube.com/embed/videoseries?"+params;frame.title=f.artist+" — "+f.album;
+  const tracks=index===2?escapeTracks:null;
+  const params=new URLSearchParams({enablejsapi:"1",origin:window.location.origin,playsinline:"1",loop:"1"});
+  if(tracks)params.set("playlist",tracks.join(","));else{params.set("listType","playlist");params.set("list",f.list);}
+  frame.src="https://www.youtube.com/embed/"+(tracks?tracks[0]:"videoseries")+"?"+params;frame.title=f.artist+" — "+f.album;
   frame.allow="autoplay; encrypted-media; picture-in-picture; fullscreen";frame.allowFullscreen=true;frame.referrerPolicy="strict-origin-when-cross-origin";box.appendChild(frame);
   loadMusic().then(yt=>{if(disposed)return;p=new yt.Player(frame,{events:{
-   onReady:()=>{if(disposed)return;music.current=p!;p!.setLoop(true);setReady(true);},
+   onReady:()=>{if(disposed)return;music.current=p!;if(tracks)p!.cuePlaylist(tracks);p!.setLoop(true);setReady(true);},
    onError:(e:{data:number})=>{if(disposed)return;v.current?.pause();setPlaying(false);setMusicError("YouTube could not play this selection ("+e.data+"). Try Next song or Reload music. Film controls still work.");},
    onAutoplayBlocked:()=>{if(disposed)return;v.current?.pause();setPlaying(false);setStatus("Tap Play inside the music player to allow sound, then Resume pairing.");}
   }});}).catch(()=>{if(!disposed)setStatus("Shared controls could not connect. You can still play the film and visible music player separately.");});
@@ -59,7 +62,7 @@ function Theater({index,next}:{index:number;next:()=>void}){
    <div className="transport"><Button disabled={!!filmError} onClick={()=>playing?pause():play()}>{playing?"Ⅱ Pause pairing":started?"▶ Resume pairing":"▶ Start pairing"}</Button><Button variant="outline" disabled={!!filmError} onClick={()=>play(true)}>↻ Restart</Button></div>
    <div className="secondary"><Button variant="ghost" disabled={!ready} onClick={()=>{music.current?.nextVideo();setMusicError("");setStatus("Next song requested. Resume the film when ready.");}}>Next song →</Button><Button variant="ghost" onClick={()=>{v.current?.pause();setPlaying(false);setReload(n=>n+1);setStatus("Reloading music from the beginning.");}}>Reload music</Button></div>
    {musicError&&<p className="error" role="alert">{musicError}</p>}<p className="status" role="status">{status}</p>
-   <div className="sources"><a href={"https://archive.org/details/"+f.archive} target="_blank" rel="noreferrer">Film source ↗</a><a href={"https://www.youtube.com/playlist?list="+f.list} target="_blank" rel="noreferrer">Album source ↗</a></div>
+   {index===2&&<p className="status">Escape’s ten-song sequence uses individual Journey uploads, including remasters, instead of the unavailable playlist.</p>}<div className="sources"><a href={"https://archive.org/details/"+f.archive} target="_blank" rel="noreferrer">Film source ↗</a><a href={index===2?"https://www.youtube.com/watch?v="+escapeTracks[0]:"https://www.youtube.com/playlist?list="+f.list} target="_blank" rel="noreferrer">Album source ↗</a></div>
   </div></aside>
   <div className="curation"><p className="eyebrow">WHY THESE TWO?</p><p>{f.note}</p><Button variant="outline" onClick={next}>{index===2?"Back to Caligari":"Next feature"} →</Button></div>
  </section>;
