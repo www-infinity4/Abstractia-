@@ -40,3 +40,6 @@ On 2026-08-30 all three exact MP4 URLs returned HTTP 206, video/mp4, and the req
 Availability does not itself establish permission for every print, restoration or music use. Check exact source terms before commercializing; retain provider controls and attribution. This app has no ad-revenue agreement, wallet, payouts or automated rights-clearance system.
 
 Flix Blender is the next separate project and has not been built or changed as part of Abstractia.
+
+## Sharing and unified wallet
+A shared wallet bar offers native sharing, copy-link fallback, and an X post composer. Confirmed sharing earns 0.1 StarCoin once per site per wallet. Opening a composer or copying a link alone earns nothing; manual confirmation is self-reported. Credits use the same browser-local wallet as StarQuest’s unified-wallet integration, not its separate cloud ledger. Pending claims retry on return. Social preview metadata is in index.html and the card is assets/share-preview-v1.png.

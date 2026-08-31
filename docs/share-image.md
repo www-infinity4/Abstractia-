@@ -1,0 +1,1 @@
+Built-in image-generation tool. Landscape social card for Abstractia. Exact title: ABSTRACTIA. Supporting text: SILENT CINEMA. ALTERNATE SOUNDTRACKS.. Original cinematic collage with film and vinyl imagery, bold typography and generous safe margins. Asset: assets/share-preview-v1.png.
