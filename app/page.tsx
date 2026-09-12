@@ -47,22 +47,22 @@ function Theater({index,next}:{index:number;next:()=>void}){
   if(reset||!started||ended){if(v.current)v.current.currentTime=0;music.current?.playVideoAt(0);}else music.current?.playVideo();
   setStarted(true);setEnded(false);setPlaying(true);
   if(v.current){v.current.muted=true;v.current.play().catch(()=>{if(active.current){pause();setStatus("Tap Play on the film, then Resume pairing.");}});}
-  setStatus(ready?"Both players requested. Ads and buffering can shift timing; Restart begins both from the top.":"Film started. Tap Play in the music player while shared controls connect.");
+  setStatus(reset?"Re-sync requested: film and soundtrack restarted together from the opening point.":ready?"Both players requested. Ads and buffering can shift timing; use Re-sync both after an interruption.":"Film started. Tap Play in the music player while shared controls connect.");
  }
  return <section className="theater" aria-label={f.title+" theater"}>
   <div className="picture"><div className="labelbar"><span>PICTURE / 0{index+1}</span><span>1920 · FILM MUTED</span></div>
    <video ref={v} src={"https://archive.org/download/"+f.archive+"/"+encodeURIComponent(f.file)} poster={"https://archive.org/services/img/"+f.archive} controls muted playsInline preload="metadata" aria-label={f.title}
     onPlay={()=>setPlaying(true)} onPause={()=>setPlaying(false)} onVolumeChange={()=>{if(v.current&&!v.current.muted)v.current.muted=true;}}
-    onEnded={()=>{pause();setEnded(true);setStatus("Feature complete. Continue to the next pairing or restart this one.");}}
+    onEnded={()=>{pause();setEnded(true);setStatus("Feature complete. Continue to the next pairing or Re-sync this one from the start.");}}
     onError={()=>{pause();setFilmError("This Archive film could not load. Try Reload film; music is independent.");}}/>
    <div className="film-title"><p>{f.director}</p><h2>{f.title}</h2></div>
    {filmError&&<div className="error" role="alert">{filmError}<Button variant="outline" onClick={()=>{setFilmError("");v.current?.load();}}>Reload film</Button></div>}
   </div>
   <aside className="sound"><div className="labelbar"><span>THE NEW SOUNDTRACK</span><span>↻ REPEAT</span></div><div className="sound-inner"><p className="artist">{f.artist}</p><h2>{f.album}</h2><div ref={mount} className="music-player"/>
-   <div className="transport"><Button disabled={!!filmError} onClick={()=>playing?pause():play()}>{playing?"Ⅱ Pause pairing":started?"▶ Resume pairing":"▶ Start pairing"}</Button><Button variant="outline" disabled={!!filmError} onClick={()=>play(true)}>↻ Restart</Button></div>
-   <div className="secondary"><Button variant="ghost" disabled={!ready} onClick={()=>{music.current?.nextVideo();setMusicError("");setStatus("Next song requested. Resume the film when ready.");}}>Next song →</Button><Button variant="ghost" onClick={()=>{v.current?.pause();setPlaying(false);setReload(n=>n+1);setStatus("Reloading music from the beginning.");}}>Reload music</Button></div>
+   <div className="transport"><Button disabled={!!filmError} onClick={()=>playing?pause():play()}>{playing?"Ⅱ Pause pairing":started?"▶ Resume pairing":"▶ Start pairing"}</Button><Button variant="outline" disabled={!!filmError} onClick={()=>play(true)}>↻ Re-sync both</Button></div>
+   <div className="secondary"><Button variant="ghost" disabled={!ready} onClick={()=>{music.current?.nextVideo();setMusicError("");setStatus("Next song requested. Use Re-sync both to return to the shared opening point.");}}>Next song →</Button><Button variant="ghost" onClick={()=>{v.current?.pause();setPlaying(false);setReload(n=>n+1);setStatus("Reloading music from the beginning. Use Re-sync both when it is ready.");}}>Reload music</Button></div>
    {musicError&&<p className="error" role="alert">{musicError}</p>}<p className="status" role="status">{status}</p>
-   {index===2&&<p className="status">Escape’s ten-song sequence uses individual Journey uploads, including remasters, instead of the unavailable playlist.</p>}<div className="sources"><a href={"https://archive.org/details/"+f.archive} target="_blank" rel="noreferrer">Film source ↗</a><a href={index===2?"https://www.youtube.com/watch?v="+escapeTracks[0]:"https://www.youtube.com/playlist?list="+f.list} target="_blank" rel="noreferrer">Album source ↗</a></div>
+   {index===2&&<p className="status">Escape’s ten-song sequence uses individual Journey uploads, including remasters, instead of the unavailable playlist.</p>}<p className="status">YouTube ads remain inside YouTube’s player. Re-sync restores the pairing after an ad or network delay instead of trying to bypass it.</p><div className="sources"><a href={"https://archive.org/details/"+f.archive} target="_blank" rel="noreferrer">Film source ↗</a><a href={index===2?"https://www.youtube.com/watch?v="+escapeTracks[0]:"https://www.youtube.com/playlist?list="+f.list} target="_blank" rel="noreferrer">Album source ↗</a></div>
   </div></aside>
   <div className="curation"><p className="eyebrow">WHY THESE TWO?</p><p>{f.note}</p><Button variant="outline" onClick={next}>{index===2?"Back to Caligari":"Next feature"} →</Button></div>
  </section>;
@@ -74,6 +74,6 @@ export default function Home(){
   <div className="intro"><h1>Three pictures.<br/><em>Another dimension.</em></h1><p>Silent cinema. Loud imagination.<br/>Choose a film. Let the album roll.</p></div>
   <nav className="program" aria-label="Three-film program">{films.map((f,i)=><Button key={f.title} variant="outline" className={selected===i?"program-card selected":"program-card"} aria-pressed={selected===i} onClick={()=>setSelected(i)}><span className="number">0{i+1}</span><span><small>{f.chapter}</small><strong>{f.short}</strong><small>{f.artist} · {f.album}</small></span><span className="selected-mark">{selected===i?"●":"↗"}</span></Button>)}</nav>
   <Theater key={selected} index={selected} next={()=>setSelected((selected+1)%films.length)}/>
-  <footer><span>ABSTRACTIA / Infinity ®</span><p>One pairing at a time. Music repeats; switching films stops the previous pair.<br/>YouTube ads, availability and buffering may affect timing. No uploads needed.</p><span>CURATED CONNECTIONS,<br/>NOT PERFECT SYNCHRONIZATION.</span></footer>
+  <footer><span>ABSTRACTIA / Infinity ®</span><p>One pairing at a time. Music repeats; switching films stops the previous pair.<br/>If an ad or delay shifts timing, use Re-sync both. YouTube availability and device rules still apply.</p><span>CURATED CONNECTIONS,<br/>WITH MANUAL RE-SYNC RECOVERY.</span></footer>
  </main>;
 }
